@@ -7,43 +7,44 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.movieappmad24.models.getMovies
 import com.example.movieappmad24.ui.theme.MovieAppMAD24Theme
+import com.example.movieappmad24.widgets.MovieRow
 import com.example.movieappmad24.widgets.SimpleBottomAppBar
 import com.example.movieappmad24.widgets.SimpleTopAppBar
 
 @Composable
-fun HomeScreen(navController: NavController) {
-    AppScaffold(navController = navController)
+fun WatchlistScreen(navController: NavController) {
+  WatchlistAppScaffold(navController = navController)
 }
 
 
 @Composable
-fun AppScaffold(navController: NavController) {
+fun WatchlistAppScaffold(navController: NavController) {
     MovieAppMAD24Theme {
         Scaffold(
-            topBar = { SimpleTopAppBar(navController = navController, title = "MovieApp", backButton = false) },
+            topBar = { SimpleTopAppBar(navController,"Watchlist", false) },
             bottomBar = { SimpleBottomAppBar(navController) }
         ) { innerPadding ->
-            MovieList(navController = navController, modifier = Modifier.padding(innerPadding))
+            MovieWatchList(navController = navController, modifier = Modifier.padding(innerPadding))
         }
     }
 }
 
+
+
 @Composable
-fun MovieList(navController: NavController, modifier: Modifier = Modifier) {
-    val movies = getMovies()
+fun MovieWatchList(navController: NavController, modifier: Modifier = Modifier) {
+    val movies = getMovies().subList(0,4)
 
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(10.dp) // Adds space between items
     ) {
         items(movies) { movie ->
-            com.example.movieappmad24.widgets.MovieRow(
+            MovieRow(
                 movie = movie,
                 onItemClick = { movieId ->
                     navController.navigate("detailscreen/$movieId")
@@ -52,13 +53,4 @@ fun MovieList(navController: NavController, modifier: Modifier = Modifier) {
             )
         }
     }
-}
-
-
-
-@Preview
-@Composable
-fun MovieAppPreview() {
-    val navController = rememberNavController()
-    AppScaffold(navController = navController)
 }
