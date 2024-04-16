@@ -32,7 +32,7 @@ fun SimpleTopAppBar(navController: NavController, title: String, backButton: Boo
         },
         navigationIcon = {
             if (backButton) {
-                IconButton(onClick = { navController.navigateUp() }) {
+                IconButton(onClick = { navController.popBackStack() }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                 }
             } else null

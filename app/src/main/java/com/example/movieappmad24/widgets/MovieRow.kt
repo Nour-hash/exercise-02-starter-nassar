@@ -17,7 +17,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -32,7 +31,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.movieappmad24.models.Movie
 import com.example.movieappmad24.ui.theme.MovieAppMAD24Theme
@@ -56,16 +54,15 @@ fun MovieDetails(movie: Movie, isVisible: Boolean) {
 @Composable
 fun MovieRow(
     movie: Movie,
-    onItemClick: (String) -> Unit,
-    navController: NavController
+    onFavoriteClick: () -> Unit,
+    onItemClick: (String) -> Unit={}
 ) {
-    var isFavorite by remember { mutableStateOf(false) }
     var showArrow by remember { mutableStateOf(false) }
 
     MovieAppMAD24Theme {
         Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.background) {
             Column {
-                MovieCardHeader(movie, onItemClick, isFavorite, onFavoriteClick = { isFavorite = !isFavorite }, navController)
+                MovieCardHeader(movie, onItemClick, onFavoriteClick)
                 MovieTitleBar(movie, showArrow, onArrowClick = { showArrow = !showArrow })
                 MovieDetails(movie, showArrow)
             }
@@ -73,14 +70,11 @@ fun MovieRow(
     }
 }
 
-
 @Composable
 fun MovieCardHeader(
     movie: Movie,
     onItemClick: (String) -> Unit,
-    isFavorite: Boolean,
-    onFavoriteClick: () -> Unit,
-    navController: NavController
+    onFavoriteClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         Card(
@@ -88,9 +82,8 @@ fun MovieCardHeader(
                 .align(Alignment.CenterStart)
                 .clickable {
                     onItemClick(movie.id)
-                    navController.navigate("detailscreen/${movie.id}") // Navigate to DetailScreen with movie ID
                 },
-            shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp), // Rounded corners at the top
+            shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             AsyncImage(
@@ -98,22 +91,23 @@ fun MovieCardHeader(
                 contentDescription = movie.title,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)) // Ensure the image also has rounded corners
-
+                    .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
             )
         }
-        IconToggleButton(
-            checked = isFavorite,
-            onCheckedChange = { onFavoriteClick() },
+        Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(8.dp)
         ) {
-            Icon(
-                tint = Color.Red,
-                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Default.FavoriteBorder,
-                contentDescription = null
-            )
+            IconButton(onClick = {
+                onFavoriteClick()
+            }) {
+                Icon(
+                    tint = if (movie.isFavorite) Color.Red else Color.Gray,
+                    imageVector = if (movie.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = "Add to favorites"
+                )
+            }
         }
     }
 }

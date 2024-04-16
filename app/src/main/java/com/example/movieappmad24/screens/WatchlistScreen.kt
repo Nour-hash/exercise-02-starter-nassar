@@ -9,26 +9,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.movieappmad24.models.getMovies
+import com.example.movieappmad24.models.Movie
 import com.example.movieappmad24.ui.theme.MovieAppMAD24Theme
+import com.example.movieappmad24.viewModel.MoviesViewModel
 import com.example.movieappmad24.widgets.MovieRow
 import com.example.movieappmad24.widgets.SimpleBottomAppBar
 import com.example.movieappmad24.widgets.SimpleTopAppBar
 
 @Composable
-fun WatchlistScreen(navController: NavController) {
-  WatchlistAppScaffold(navController = navController)
+fun WatchlistScreen(navController: NavController, moviesViewModel: MoviesViewModel) {
+    WatchlistAppScaffold(navController = navController, moviesViewModel = moviesViewModel)
 }
 
 
+
 @Composable
-fun WatchlistAppScaffold(navController: NavController) {
+fun WatchlistAppScaffold(navController: NavController, moviesViewModel: MoviesViewModel) {
     MovieAppMAD24Theme {
         Scaffold(
             topBar = { SimpleTopAppBar(navController,"Watchlist", false) },
             bottomBar = { SimpleBottomAppBar(navController) }
         ) { innerPadding ->
-            MovieWatchList(navController = navController, modifier = Modifier.padding(innerPadding))
+            MovieWatchList(navController = navController, moviesViewModel = moviesViewModel, modifier = Modifier.padding(innerPadding))
         }
     }
 }
@@ -36,8 +38,8 @@ fun WatchlistAppScaffold(navController: NavController) {
 
 
 @Composable
-fun MovieWatchList(navController: NavController, modifier: Modifier = Modifier) {
-    val movies = getMovies().subList(0,4)
+fun MovieWatchList(navController: NavController, moviesViewModel: MoviesViewModel, modifier: Modifier = Modifier) {
+    val movies = moviesViewModel.movieList.filter { movie: Movie -> movie.isFavorite }
 
     LazyColumn(
         modifier = modifier,
@@ -49,8 +51,9 @@ fun MovieWatchList(navController: NavController, modifier: Modifier = Modifier) 
                 onItemClick = { movieId ->
                     navController.navigate("detailscreen/$movieId")
                 },
-                navController = navController
+                onFavoriteClick = { moviesViewModel.toggleIsFavouriteState(movie) }
             )
         }
     }
 }
+

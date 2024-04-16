@@ -1,11 +1,12 @@
 package com.example.movieappmad24.screens
 
-import androidx.compose.foundation.layout.Column
+import android.media.browse.MediaBrowser
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,17 +20,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.movieappmad24.R
-import com.example.movieappmad24.models.getMovies
+import com.example.movieappmad24.viewModel.MoviesViewModel
 import com.example.movieappmad24.widgets.MovieRow
 import com.example.movieappmad24.widgets.SimpleTopAppBar
 
 
 @Composable
-fun DetailScreen(navController: NavController, movieId: String) {
-    val movie = getMovies().find { it.id == movieId }
+fun DetailScreen(navController: NavController, movieId: String, moviesViewModel: MoviesViewModel) {
+
+    val movie = moviesViewModel.movieList.find { it.id == movieId }
 
     if (movie == null) {
         Text("Movie not found")
@@ -42,12 +45,15 @@ fun DetailScreen(navController: NavController, movieId: String) {
             SimpleTopAppBar(navController = navController, title = movie.title, backButton = true)
         },
         content = { paddingValues ->
-            Column(modifier = Modifier.padding(paddingValues)) {
-                MovieRow(
-                    movie = movie,
-                    onItemClick = {},
-                    navController = navController
-                )
+            LazyColumn(modifier = Modifier.padding(paddingValues)) {
+                item {
+                    MovieRow(
+                        movie = movie,
+                        onFavoriteClick = { moviesViewModel.toggleIsFavouriteState(movie = movie) }
+
+                    )
+                }
+                item {
                     LazyRow(
                         modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(start = 8.dp, top = 6.dp, bottom = 6.dp)
@@ -56,9 +62,9 @@ fun DetailScreen(navController: NavController, movieId: String) {
                             MoviePicture(resourceLink = image, title = movie.title)
                         }
                     }
-
-
+                }
             }
+
         }
     )
 
@@ -83,9 +89,12 @@ fun MoviePicture(resourceLink: String, title: String) {
     }
 }
 
+
+
 @Preview
 @Composable
 fun MovieApp_Detail_Preview() {
     val navController = rememberNavController()
-    DetailScreen(navController,"tt0903747")
+    val moviesViewModel: MoviesViewModel = viewModel()
+    DetailScreen(navController,"tt0903747" , moviesViewModel)
 }
