@@ -1,9 +1,11 @@
 package com.example.movieappmad24.screens
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -66,6 +68,10 @@ fun DetailScreen(navController: NavController, movieId: String, moviesViewModel:
                     )
                 }
                 item {
+                    Spacer(modifier = Modifier.height(16.dp)) // Add spacer here
+                }
+                item {
+                    Text(text = "Movie Trailer")
                     ExoPlayer(movieTrailer = movie.trailer)
                 }
                 item {
