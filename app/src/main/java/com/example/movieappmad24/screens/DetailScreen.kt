@@ -14,13 +14,26 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.movieappmad24.R
@@ -52,6 +65,9 @@ fun DetailScreen(navController: NavController, movieId: String, moviesViewModel:
                         onFavoriteClick = { moviesViewModel.toggleIsFavouriteState(movie = movie) }
 
                     )
+                }
+                item {
+                    ExoPlayer(movieTrailer = movie.trailer)
                 }
                 item {
                     LazyRow(
@@ -89,7 +105,66 @@ fun MoviePicture(resourceLink: String, title: String) {
     }
 }
 
+@Composable
+fun ExoPlayer(
+    movieTrailer: String
+) {
+    var lifecycle by remember {
+        mutableStateOf(value = Lifecycle.Event.ON_CREATE)
+    }
+    val context = LocalContext.current
+    val trailer = MediaItem.fromUri("android.resource://${context.packageName}/$movieTrailer")
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(trailer)
+            prepare()
+        }
+    }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(key1 = lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            lifecycle = event
+        }
+        lifecycleOwner.lifecycle.addObserver(observer = observer)
 
+        onDispose {
+            exoPlayer.release()
+            lifecycleOwner.lifecycle.removeObserver(observer = observer)
+        }
+    }
+    var videoPaused by remember {
+        mutableStateOf(value = true)
+    }
+
+    AndroidView(
+        factory = {
+            PlayerView(context).also { playerView ->
+                playerView.player = exoPlayer
+            }
+        },
+        update = { playerView ->
+            when (lifecycle) {
+                Lifecycle.Event.ON_RESUME -> {
+                    playerView.onResume()
+                    if (!videoPaused) {
+                        exoPlayer.play()
+                    }
+                }
+
+                Lifecycle.Event.ON_STOP -> {
+                    playerView.onPause()
+                    videoPaused = !exoPlayer.isPlaying
+                    exoPlayer.pause()
+                }
+
+                else -> Unit
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(ratio = 16f / 9f)
+    )
+}
 
 @Preview
 @Composable
