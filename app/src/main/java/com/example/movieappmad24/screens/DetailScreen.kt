@@ -1,6 +1,5 @@
 package com.example.movieappmad24.screens
 
-import android.media.browse.MediaBrowser
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
